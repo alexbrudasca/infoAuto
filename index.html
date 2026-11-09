@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f7f9fc" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <title>InfoAuto</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/darkmode-js/lib/darkmode-js.min.js"
+      defer
+    ></script>
+    <script>
+      const savedTheme = localStorage.getItem("infoauto-theme") || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    </script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">I</div>
+          <div>
+            <strong>InfoAuto</strong><small>Documentele mașinii, la zi</small>
+          </div>
+        </div>
+        <div class="container">
+          <button id="logoutBtn" class="text-button hidden">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+          <button
+            id="themeToggle"
+            type="button"
+            aria-label="Schimbă tema"
+            title="Schimbă tema"
+          >
+            <span id="themeIcon">☾</span>
+          </button>
+        </div>
+      </header>
+
+      <section id="authView" class="auth-layout">
+        <div class="intro">
+          <span class="eyebrow">SIMPLU. CLAR. ORGANIZAT.</span>
+          <h1>Ai grijă de<br /><span>actele mașinii.</span></h1>
+          <p>
+            Urmărește ITP-ul, asigurarea RCA și rovinieta într-un singur loc.
+            Fiecare utilizator are propriul cont și propriile mașini.
+          </p>
+          <div class="feature-pills">
+            <span>✓ Alerte de expirare</span><span>✓ Istoric documente</span
+            ><span>✓ Acces privat</span>
+          </div>
+        </div>
+        <div class="panel auth-card">
+          <div class="tabs">
+            <button class="tab active" data-tab="login">Autentificare</button
+            ><button class="tab" data-tab="signup">Cont nou</button>
+          </div>
+          <form id="authForm">
+            <label
+              >Email<input
+                id="email"
+                type="email"
+                autocomplete="email"
+                placeholder="nume@email.com"
+                required
+            /></label>
+            <label
+              >Parolă<input
+                id="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Minimum 6 caractere"
+                minlength="6"
+                required
+            /></label>
+            <!-- checkbox for remember password -->
+            <label class="remember-me">
+              <input type="checkbox" id="rememberEmail" />
+              <span>Ține minte emailul</span>
+            </label>
+
+            <button class="primary full" id="authSubmit">Intră în cont</button>
+          </form>
+          <p class="muted tiny" id="authMessage">
+            Conturile sunt private. Datele fiecăruia nu sunt vizibile
+            celorlalți.
+          </p>
+        </div>
+      </section>
+
+      <section id="appView" class="hidden">
+        <div class="welcome-row">
+          <div>
+            <span class="eyebrow">PANOU PERSONAL</span>
+            <h1>Mașinile tale</h1>
+            <p class="muted">
+              Documentele și termenele importante, dintr-o privire.
+            </p>
+          </div>
+          <div class="car-actions">
+            <!-- <button id="enableNotifications" class="small-btn">
+              Activează notificările
+            </button> -->
+          </div>
+        </div>
+        <div class="summary-grid">
+          <!-- adaugare button de notificare -->
+          <div class="car-actions">
+            <button id="enableNotifications" class="small-btn">
+              🔔 Activează notificările
+            </button>
+            <button id="addCarBtn" class="primary">＋ Adaugă mașină</button>
+          </div>
+          <!-- sfarsit modificare-->
+          <div class="summary-card">
+            <span class="summary-icon blue">▣</span>
+            <div><strong id="carCount">0</strong><small>Mașini</small></div>
+          </div>
+          <div class="summary-card">
+            <span class="summary-icon amber">◷</span>
+            <div>
+              <strong id="urgentCount">0</strong
+              ><small>Expiră în 30 zile</small>
+            </div>
+          </div>
+          <div class="summary-card">
+            <span class="summary-icon green">✓</span>
+            <div>
+              <strong id="validCount">0</strong
+              ><small>Documente valabile</small>
+            </div>
+          </div>
+        </div>
+        <div id="carsList" class="cars-list"></div>
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-icon">＋</div>
+          <h2>Adaugă prima mașină</h2>
+          <p>
+            Introdu datele mașinii și apoi completează datele de expirare pentru
+            ITP, RCA și rovinietă.
+          </p>
+          <button class="primary" id="emptyAddBtn">Adaugă mașină</button>
+        </div>
+        <footer>InfoAuto · Datele tale sunt private</footer>
+      </section>
+    </main>
+
+    <dialog id="carDialog" class="modal">
+      <form id="carForm" method="dialog">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">VEHICUL NOU</span>
+            <h2>Adaugă mașină</h2>
+          </div>
+          <button type="button" class="close" data-close="carDialog">×</button>
+        </div>
+        <label
+          >Marcă și model<input
+            id="carName"
+            placeholder="Ex. Volkswagen Passat"
+            required
+            maxlength="80"
+        /></label>
+        <div class="two-col">
+          <label
+            >Număr înmatriculare<input
+              id="plate"
+              placeholder="B 123 ABC"
+              required
+              maxlength="15" /></label
+          ><label
+            >An (opțional)<input
+              id="carYear"
+              type="number"
+              min="1950"
+              max="2035"
+              placeholder="2022"
+          /></label>
+        </div>
+        <label
+          >Observații (opțional)<textarea
+            id="carNotes"
+            rows="2"
+            placeholder="Detalii utile..."
+          ></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="secondary" data-close="carDialog">
+            Anulează</button
+          ><button class="primary">Salvează mașina</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="docDialog" class="modal">
+      <form id="docForm" method="dialog">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">DOCUMENT AUTO</span>
+            <h2 id="docTitle">Adaugă document</h2>
+          </div>
+          <button type="button" class="close" data-close="docDialog">×</button>
+        </div>
+        <input id="docCarId" type="hidden" /><input
+          id="docType"
+          type="hidden"
+        />
+        <label>Data expirării<input id="expiry" type="date" required /></label>
+        <div class="two-col">
+          <label
+            >Cost (lei)<input
+              id="cost"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Opțional" /></label
+          ><label>Data emiterii<input id="issued" type="date" /></label>
+        </div>
+        <label
+          >Notițe (opțional)<textarea
+            id="docNotes"
+            rows="2"
+            placeholder="Serie poliță, furnizor etc."
+          ></textarea>
+        </label>
+        <p class="muted tiny">
+          Poți actualiza documentul când îl reînnoiești. Înregistrarea
+          anterioară rămâne în istoric.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="secondary" data-close="docDialog">
+            Anulează</button
+          ><button class="primary">Salvează documentul</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status" class="toast"></div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
